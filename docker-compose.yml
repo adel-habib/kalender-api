@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+
+  mysql-development:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: kalender
+    ports:
+      - "3306:3306"
