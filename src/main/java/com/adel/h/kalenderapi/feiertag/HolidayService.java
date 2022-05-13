@@ -55,7 +55,35 @@ public class HolidayService {
         return LocalDate.of(year, month, day);
     }
 
+    public void initHolidays(LocalDate current){
+        LocalDate future = current.plusYears(10);
+        LocalDate past = current.minusYears(10);
+        holidayRepository.deleteAll();
+        List<Holiday> calculatedHolidays = new ArrayList<>();
+        for (int i= past.getYear(); i< future.getYear(); i++)
+            calculatedHolidays.addAll(determineHolidays(i));
+        calculatedHolidays.forEach( (holiday -> holidayRepository.save(holiday)));
+    }
     public List<Holiday> determineHolidays(int year){
+
+        final String DE = "Deutschland";
+        final String BW = "Baden-Württemberg";
+        final String BY = "Bayern";
+        final String ST = "Sachsen-Anhalt";
+        final String BB = "Brandenburg";
+        final String HE = "Hessen";
+        final String NW = "Nordrhein-Westfalen";
+        final String RP = "Rheinland-Pfalz";
+        final String SL = "Saarland";
+        final String BE = "Berlin";
+        final String HB = "Bremen";
+        final String HH = "Hamburg";
+        final String SN = "Sachsen";
+        final String TH = "Thüringen";
+        final String SH = "Schleswig-Holstein";
+        final String MV = "Mecklenburg-Vorpommern";
+        final String NV = "Nordrhein-Westfalen";
+        final String NI = "Niedersachsen";
 
         LocalDate NOV_23 = LocalDate.of(year, Month.NOVEMBER, 23);
         // Fixed Holidays
@@ -80,20 +108,42 @@ public class HolidayService {
        final LocalDate FRONLEICHNAM = OSTER_SONNTAG.plusDays(60);
        final LocalDate BUSS_UND_BETTAG = NOV_23.with(TemporalAdjusters.previous(DayOfWeek.WEDNESDAY));
 
-       List<LocalDate> nationalHolidays = new ArrayList<>(Arrays.asList(NEUJAHR,KAR_FREITAG,OSTER_MONTAG,CHRISTI_HIMMEL_FAHRT,
-               PFINGST_MONTAG,TAG_DER_ARBEIT,TAG_DER_DEUTSCHEN_EINHEIT,ERSTER_WEIHNACHTSTAG,ZWEITER_WEIHNACHTSTAG));
-       String[] nationalHolidaysNAmes =  {"Neujahr", "Karfreitag" , "Ostermontag" , "Christi Himmelfahrt",
-               "Pfingstmontag" , "1. Mai", "Tag der Deutschen Einheit",  "erster Weihnachtstag" , "zweiter Weihnachtstag"};
+       List<LocalDate> federalHolidaysDates = new ArrayList<>(
+               Arrays.asList(
+                       NEUJAHR,
+                       KAR_FREITAG,
+                       OSTER_MONTAG,
+                       CHRISTI_HIMMEL_FAHRT,
+                       PFINGST_MONTAG,TAG_DER_ARBEIT,
+                       TAG_DER_DEUTSCHEN_EINHEIT,
+                       ERSTER_WEIHNACHTSTAG,
+                       ZWEITER_WEIHNACHTSTAG
+               )
+       );
 
-        Region DE = regionRepository.findRegionByName("Deutschland");
-        Set<Region> laender = new HashSet<>();
-        List<Region> BL = regionRepository.findRegionsByParent(DE);
-        BL.add(DE);
+        List<String> federalHolidaysNames = new ArrayList<>(
+                Arrays.asList(
+                        "Neujahr",
+                        "Karfreitag",
+                        "Ostermontag",
+                        "Christi Himmelfahrt",
+                        "Pfingstmontag",
+                        "1. Mai",
+                        "Tag der Deutschen Einheit",
+                        "erster Weihnachtstag",
+                        "zweiter Weihnachtstag"
+                )
+        );
+
         List<Holiday> holidays = new ArrayList<>();
-        laender.addAll(BL);
+
+        Region GERMANY = regionRepository.findRegionByName("Deutschland");
+        Set<Region> federalStates = new HashSet<>();
+        federalStates.addAll(regionRepository.findRegionsByParent(GERMANY));
+        federalStates.add(GERMANY);
+
         int[] idx = { 0 };
-        nationalHolidays.forEach( (date) -> holidays.add(new Holiday(nationalHolidaysNAmes[idx[0]++],date,laender)));
-        holidays.forEach( (H) -> holidayRepository.save(H));
+        federalHolidaysDates.forEach( (date) -> holidays.add(new Holiday(federalHolidaysNames.get(idx[0]++),date,federalStates)));
         return holidays;
     }
 
